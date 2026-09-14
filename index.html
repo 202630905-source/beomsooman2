@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>오늘 먹은 저녁메뉴 추천 🍽️</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, 'Helvetica Neue', 'Segoe UI', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 99%, #fecfef 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 40px 30px;
+            border-radius: 24px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
+            text-align: center;
+            max-width: 420px;
+            width: 100%;
+            backdrop-filter: blur(10px);
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        h1 {
+            color: #333;
+            font-size: 26px;
+            font-weight: 800;
+            margin-bottom: 8px;
+        }
+
+        p.subtitle {
+            color: #666;
+            font-size: 15px;
+            margin-bottom: 30px;
+        }
+
+        .result-container {
+            background: #fff0f3;
+            border: 2px dashed #ff4d6d;
+            border-radius: 20px;
+            padding: 30px 20px;
+            margin-bottom: 30px;
+            min-height: 180px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .emoji-box {
+            font-size: 80px;
+            line-height: 1;
+            margin-bottom: 15px;
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .emoji-box.bounce {
+            animation: bounce 0.5s ease;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.3) rotate(10deg); }
+        }
+
+        .food-name {
+            font-size: 22px;
+            font-weight: 700;
+            color: #ff4d6d;
+            min-height: 30px;
+        }
+
+        .recommend-btn {
+            background: linear-gradient(45deg, #ff4d6d, #ff758f);
+            color: white;
+            border: none;
+            padding: 16px 36px;
+            font-size: 18px;
+            font-weight: 700;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 8px 20px rgba(255, 77, 109, 0.4);
+            transition: all 0.2s ease;
+            outline: none;
+            width: 100%;
+        }
+
+        .recommend-btn:hover {
+            background: linear-gradient(45deg, #ff758f, #ff4d6d);
+            box-shadow: 0 10px 25px rgba(255, 77, 109, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .recommend-btn:active {
+            transform: translateY(1px);
+            box-shadow: 0 4px 10px rgba(255, 77, 109, 0.3);
+        }
+
+        .footer {
+            margin-top: 25px;
+            font-size: 12px;
+            color: #aaa;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <h1>오늘 뭐 먹지? 😋</h1>
+        <p class="subtitle">결정장애를 해결해줄 저녁 메뉴 추천기!</p>
+
+        <div class="result-container">
+            <div class="emoji-box" id="emoji">❓</div>
+            <div class="food-name" id="food">버튼을 눌러보세요!</div>
+        </div>
+
+        <button class="recommend-btn" onclick="recommendMenu()">저녁메뉴추천</button>
+
+        <div class="footer">
+            오늘의 맛있는 한 끼를 위해 ✨
+        </div>
+    </div>
+
+    <script>
+        const menuList = [
+            { name: "삼겹살", emoji: "🥓" },
+            { name: "치킨", emoji: "🍗" },
+            { name: "피자", emoji: "🍕" },
+            { name: "초밥", emoji: "🍣" },
+            { name: "떡볶이", emoji: "🥘" },
+            { name: "짜장면", emoji: "🍜" },
+            { name: "햄버거", emoji: "🍔" },
+            { name: "돈까스", emoji: "🥩" },
+            { name: "마라탕", emoji: "🍲" },
+            { name: "족발", emoji: "🍖" },
+            { name: "파스타", emoji: "🍝" },
+            { name: "부대찌개", emoji: "🍲" },
+            { name: "카레", emoji: "🍛" },
+            { name: "김밥", emoji: "🍙" },
+            { name: "타코", emoji: "🌮" },
+            { name: "스테이크", emoji: "🥩" },
+            { name: "쌀국수", emoji: "🍜" },
+            { name: "우동", emoji: "🍲" },
+            { name: "샌드위치", emoji: "🥪" },
+            { name: "곱창", emoji: "🥩" }
+        ];
+
+        let isSpinning = false;
+
+        function recommendMenu() {
+            if (isSpinning) return;
+            isSpinning = true;
+
+            const emojiEl = document.getElementById("emoji");
+            const foodEl = document.getElementById("food");
+
+            let counter = 0;
+            const maxCycles = 15;
+            
+            // 메뉴 롤링 효과
+            const interval = setInterval(() => {
+                const randomTemp = menuList[Math.floor(Math.random() * menuList.length)];
+                emojiEl.textContent = randomTemp.emoji;
+                foodEl.textContent = randomTemp.name;
+                counter++;
+
+                if (counter >= maxCycles) {
+                    clearInterval(interval);
+                    
+                    // 최종 선택
+                    const selected = menuList[Math.floor(Math.random() * menuList.length)];
+                    emojiEl.textContent = selected.emoji;
+                    foodEl.textContent = selected.name;
+
+                    // 바운스 애니메이션 재실행
+                    emojiEl.classList.remove("bounce");
+                    void emojiEl.offsetWidth; // reflow 실행
+                    emojiEl.classList.add("bounce");
+
+                    isSpinning = false;
+                }
+            }, 80);
+        }
+    </script>
+</body>
+</html>
